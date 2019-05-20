@@ -1,79 +1,58 @@
 SHELL=/bin/bash
 
-########## DIRECTORIES ##########
-
-SRCDIR=src
-
-BUILDDIR=build
-
-DISTDIR=dist
-
-TARGET=${DISTDIR}/sudoku-solver
-
-BUILDOBJS=
-BUILDOBJS+=${BUILDDIR}/parse_args.o
-BUILDOBJS+=${BUILDDIR}/sudoku_table.o
-BUILDOBJS+=${BUILDDIR}/sudoku_cell.o
-BUILDOBJS+=${BUILDDIR}/sudoku_option.o
-BUILDOBJS+=${BUILDDIR}/sudoku_solver.o
-BUILDOBJS+=${BUILDDIR}/main.o
-
-########## COMPILER AND LINKER ############
+SRC=./src
+BUILD=./build
+DIST=./dist
+TARGET=${DIST}/sudoku-solver
 
 CXX=/usr/bin/g++
+CFLAGS=-ggdb -Wall -Wextra
 
-INCLUDEDIRS=
-INCLUDEDIRS+=-I${SRCDIR}/arguments
-INCLUDEDIRS+=-I${SRCDIR}/sudoku
+CFLAGS+=\
+	-I${SRC}/arguments\
+	-I${SRC}/sudoku
 
-CXXFLAGS=-std=gnu++14 -ggdb -Wall -Wextra ${INCLUDEDIRS}
-
-CXXFLAGS_RELEASE=-std=gnu++14 -O3 -Wall -Wextra ${INCLUDEDIRS}
-
-LDFLAGS=
-
-########## RULES ##########
-.PHONY: clean all
+BUILD_OBJS=\
+	${BUILD}/arguments_parse_args.o\
+	${BUILD}/sudoku_sudoku_cell.o\
+	${BUILD}/sudoku_sudoku_option.o\
+	${BUILD}/sudoku_sudoku_solver.o\
+	${BUILD}/sudoku_sudoku_table.o\
+	${BUILD}/main.o
 
 all: make_dirs ${TARGET}
 
+clean:
+	@if [[ -d ${BUILD} ]]; then \
+		echo "Removing ${BUILD} directory..."; \
+		rm -rf ${BUILD}; \
+	fi
+	@if [[ -d ${DIST} ]]; then \
+		echo "Removing ${DIST} directory..."; \
+		rm -rf ${DIST}; \
+	fi
+
 make_dirs:
-	@mkdir -p ${BUILDDIR}
-	@mkdir -p ${DISTDIR}
+	@mkdir -p ${BUILD}
+	@mkdir -p ${DIST}
 
-clean: 
-	@rm -rf ${BUILDDIR}
-	@rm -rf ${DISTDIR}
+${BUILD}/arguments_parse_args.o: ${SRC}/arguments/parse_args.cpp ${SRC}/arguments/parse_args.h
+	${CXX} ${CFLAGS} -c ${SRC}/arguments/parse_args.cpp -o ${BUILD}/arguments_parse_args.o
 
-${BUILDDIR}/parse_args.o: ${SRCDIR}/arguments/parse_args.h ${SRCDIR}/arguments/parse_args.cpp
-	@echo -e "\n\t"$@
-	${CXX} ${CXXFLAGS} -c ${SRCDIR}/arguments/parse_args.cpp -o ${BUILDDIR}/parse_args.o
+${BUILD}/sudoku_sudoku_cell.o: ${SRC}/sudoku/sudoku_cell.cpp ${SRC}/sudoku/sudoku_cell.h
+	${CXX} ${CFLAGS} -c ${SRC}/sudoku/sudoku_cell.cpp -o ${BUILD}/sudoku_sudoku_cell.o
 
-${BUILDDIR}/sudoku_exception.o: ${SRCDIR}/sudoku/sudoku_exception.h ${SRCDIR}/sudoku/sudoku_exception.cpp
-	@echo -e "\n\t"$@
-	${CXX} ${CXXFLAGS} -c ${SRCDIR}/sudoku/sudoku_exception.cpp -o ${BUILDDIR}/sudoku_exception.o
+${BUILD}/sudoku_sudoku_option.o: ${SRC}/sudoku/sudoku_option.cpp ${SRC}/sudoku/sudoku_option.h
+	${CXX} ${CFLAGS} -c ${SRC}/sudoku/sudoku_option.cpp -o ${BUILD}/sudoku_sudoku_option.o
 
-${BUILDDIR}/sudoku_table.o: ${SRCDIR}/sudoku/sudoku_table.h ${SRCDIR}/sudoku/sudoku_table.cpp
-	@echo -e "\n\t"$@
-	${CXX} ${CXXFLAGS} -c ${SRCDIR}/sudoku/sudoku_table.cpp -o ${BUILDDIR}/sudoku_table.o
+${BUILD}/sudoku_sudoku_solver.o: ${SRC}/sudoku/sudoku_solver.cpp ${SRC}/sudoku/sudoku_solver.h
+	${CXX} ${CFLAGS} -c ${SRC}/sudoku/sudoku_solver.cpp -o ${BUILD}/sudoku_sudoku_solver.o
 
-${BUILDDIR}/sudoku_cell.o: ${SRCDIR}/sudoku/sudoku_cell.h ${SRCDIR}/sudoku/sudoku_cell.cpp
-	@echo -e "\n\t"$@
-	${CXX} ${CXXFLAGS} -c ${SRCDIR}/sudoku/sudoku_cell.cpp -o ${BUILDDIR}/sudoku_cell.o
+${BUILD}/sudoku_sudoku_table.o: ${SRC}/sudoku/sudoku_table.cpp ${SRC}/sudoku/sudoku_table.h
+	${CXX} ${CFLAGS} -c ${SRC}/sudoku/sudoku_table.cpp -o ${BUILD}/sudoku_sudoku_table.o
 
-${BUILDDIR}/sudoku_option.o: ${SRCDIR}/sudoku/sudoku_option.h ${SRCDIR}/sudoku/sudoku_option.cpp
-	@echo -e "\n\t"$@
-	${CXX} ${CXXFLAGS} -c ${SRCDIR}/sudoku/sudoku_option.cpp -o ${BUILDDIR}/sudoku_option.o
+${BUILD}/main.o: ${SRC}/main.cpp
+	${CXX} ${CFLAGS} -c ${SRC}/main.cpp -o ${BUILD}/main.o
 
-${BUILDDIR}/sudoku_solver.o: ${SRCDIR}/sudoku/sudoku_solver.h ${SRCDIR}/sudoku/sudoku_solver.cpp
-	@echo -e "\n\t"$@
-	${CXX} ${CXXFLAGS} -c ${SRCDIR}/sudoku/sudoku_solver.cpp -o ${BUILDDIR}/sudoku_solver.o
-
-${BUILDDIR}/main.o: ${SRCDIR}/main.cpp
-	@echo -e "\n\t"$@
-	${CXX} ${CXXFLAGS} -c ${SRCDIR}/main.cpp -o ${BUILDDIR}/main.o
-
-${TARGET}: ${BUILDOBJS}
-	@echo -e "\n\t"$@
-	${CXX} ${CXXFLAGS} -no-pie ${BUILDOBJS} -o ${TARGET} ${LDFLAGS}
-	
+${TARGET}: ${BUILD_OBJS}
+	${CXX} ${CFLAGS} ${BUILD_OBJS} -o ${TARGET}

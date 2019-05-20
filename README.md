@@ -36,3 +36,4 @@ cd dist
 Show help command.
 
 `./sudoku-solver -h`
+
